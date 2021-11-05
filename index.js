@@ -1,36 +1,98 @@
 const readline = require('readline-sync');
 
-console.log('Welcome to the calculator!');
-console.log('Please enter an operator');
-const op = readline.prompt();
-
-console.log(`How many nums to ${op}?`);
-const numOps = readline.prompt();
-
-let res = 0;
-let nums = [];
-
-for (let i = 0; i<numOps; i++){
-    console.log(`Please enter number ${i+1}:`);
-    nums.push(parseFloat(readline.prompt()));
+function numberInput(){
+    let temp;
+    do {
+        temp = parseFloat(readline.prompt());
+    } while (isNaN(temp));
+    return temp
 }
-res = nums[0]
-for (let j = 1; j<numOps; j++){
+
+function getCalculationMode(){
+    console.log('Which calculator mode do you want?\n 1) Arithmetic \n 2) Vowel Counting');
+    resp = readline.prompt();
+    return resp
+}
+
+function chooseOperator(){
+    const op = readline.prompt();
+    if (!['+','-','/','*'].includes(op)) {
+        throw new Error('Not a valid operator');
+    } else {
+        return op
+    }
+}
+
+function performCalculation(){
+    console.log('Please enter an operator');
+    let op;
+    while (!op) {
+        try {
+            op = chooseOperator();
+        } catch (e) {
+            console.error(e.message);
+        }
+    }
+
+    console.log(`How many nums to ${op}?`);
+    const numOps = numberInput();
+
+    let res = 0;
+    let nums = [];
+
+    for (let i = 0; i<numOps; i++){
+        console.log(`Please enter number ${i+1}:`);
+        nums.push(numberInput())
+    }
+    
+    let reducer;
     switch (op) {
         case '+':
-            res += nums[j];
+            reducer = (prev,curr) => prev + curr;
             break;
         case '-':
-            res = res - nums[j];
+            reducer = (prev,curr) => prev - curr;
             break;
         case '*':
-            res = nums[j] * res;
+            reducer = (prev,curr) => prev * curr;
             break;
         case '/':
-            res = res / nums[j] ;
+            reducer = (prev,curr) => prev / curr;
             break;
         default:
             console.log('Not a valid operator!');
     }
+    if (op == '/'){
+        res = nums.filter(x => Math.abs(x) > 0).reduce(reducer)
+    }else{
+        res = nums.reduce(reducer)
+    }
+    
+    console.log(`The result is: ${res}`);
 }
-console.log(`The result is: ${res}`);
+
+function performVowelCount(){
+    console.log('Please enter a string');
+    s = readline.prompt();
+    let dict = {A:0,E:0,I:0,O:0,U:0};
+    [...s].forEach(c => {
+        c = c.toUpperCase();
+        if (c in dict){
+            dict[c] +=1;
+        }
+    })
+    console.log(dict);
+}
+
+
+console.log('Welcome to the calculator!');
+
+while (true) {
+    const calcMode = getCalculationMode();
+    if (calcMode == '1'){
+        performCalculation();
+    } else if (calcMode == '2'){
+        performVowelCount();
+    }
+}
+
